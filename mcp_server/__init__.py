@@ -1,2 +1,2 @@
-"""Internal MCP server package."""
+"""Calculator MCP server package."""
 

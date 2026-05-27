@@ -21,14 +21,10 @@ venv/
 # Local configuration and secrets
 .env
 .env.*
-!.env.example
+config.production.env
 
-# Runtime data
+# Runtime log
 logs/
-data/
-*.db
-*.sqlite
-*.sqlite3
 
 # TLS certificates and keys
 certs/

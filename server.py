@@ -11,8 +11,8 @@ from mcp_server.tools import register_tools
 
 configure_audit_logging(settings.log_path)
 
-mcp = FastMCP(settings.server_name)
-register_tools(mcp, settings)
+mcp = FastMCP("Calculator MCP")
+register_tools(mcp)
 
 middleware = [
     Middleware(
