@@ -3,10 +3,13 @@ from __future__ import annotations
 import hmac
 import ipaddress
 import json
+import logging
 
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .audit import new_trace_id, request_trace_id, request_user
+
+logger = logging.getLogger("mcp.security")
 
 
 class SecurityMiddleware:
@@ -39,20 +42,24 @@ class SecurityMiddleware:
 
         host = headers.get("host", "").split(":")[0]
         if self.allowed_hosts and host not in self.allowed_hosts:
+            logger.warning("request_rejected reason=host_not_allowed host=%s client_ip=%s", host, client_ip)
             await self._reject(send, 403, "host_not_allowed")
             return
 
         if not self._ip_allowed(client_ip):
+            logger.warning("request_rejected reason=client_ip_not_allowed host=%s client_ip=%s", host, client_ip)
             await self._reject(send, 403, "client_ip_not_allowed")
             return
 
         origin = headers.get("origin")
         if origin and self.allowed_origins and origin not in self.allowed_origins:
+            logger.warning("request_rejected reason=origin_not_allowed host=%s client_ip=%s origin=%s", host, client_ip, origin)
             await self._reject(send, 403, "origin_not_allowed")
             return
 
         user = self._authenticated_user(headers)
         if not user:
+            logger.warning("request_rejected reason=missing_or_invalid_token host=%s client_ip=%s", host, client_ip)
             await self._reject(send, 401, "missing_or_invalid_token")
             return
 
