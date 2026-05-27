@@ -153,14 +153,14 @@ MCP_PORT=8000
 MCP_PATH=/mcp
 MCP_BEARER_TOKENS=
 MCP_API_KEYS=test-api-key
-MCP_ALLOWED_HOSTS=Tailscale的IP位置,localhost,127.0.0.1
+MCP_ALLOWED_HOSTS=localhost,127.0.0.1,伺服器主機Tailscale的IP位置
 MCP_ALLOWED_ORIGINS=
-MCP_ALLOWED_CLIENT_CIDRS=100.64.0.0/10,127.0.0.1/32
+MCP_ALLOWED_CLIENT_CIDRS=100.64.0.0/10,127.0.0.1/32, 允許連線主機Tailscale的IP位置/32 , 允許連線主機的IP位置/32
 MCP_TRUSTED_PROXY_CIDRS=127.0.0.1/32
 MCP_AUDIT_LOG=./logs/tool_calls.jsonl
 ```
 
-如果你只想放行某一台電腦，請把 `MCP_ALLOWED_CLIENT_CIDRS` 改成對方實際 IP 的 `/32`，例如：
+如果你只想放行某一台電腦，請把 `MCP_ALLOWED_CLIENT_CIDRS` 改成對方實際 IP位置 和 Tailscale的IP位置加上 `/32`，例如：
 
 ```dotenv
 MCP_ALLOWED_CLIENT_CIDRS=100.113.45.31/32,192.168.50.57/32,127.0.0.1/32
@@ -188,7 +188,7 @@ sudo ufw status
 直連測試網址：
 
 ```text
-http://Tailscale的IP位置:8000/mcp
+http://遠端主機Tailscale的IP位置:8000/mcp
 ```
 
 如果瀏覽器看到：
