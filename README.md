@@ -128,9 +128,13 @@ http://127.0.0.1:8000/mcp
 ```toml
 [mcp_servers.calculator]
 url = "http://127.0.0.1:8000/mcp"
-
-[mcp_servers.calculator.headers]
-X-API-Key = "test-api-key"
+http_headers = { "X-API-Key" = "test-api-key" }
+```
+或是
+```toml
+[mcp_servers.calculator]
+url = "http://遠端主機IP位置:8000/mcp"
+http_headers = { "X-API-Key" = "test-api-key" }
 ```
 
 連線成功後應能列出：
