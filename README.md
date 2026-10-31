@@ -1,5 +1,7 @@
 # FastMCP Calculator Example
 
+[![Tests](https://github.com/yu-ken0207/fastmcp-calculator-example/actions/workflows/test.yml/badge.svg)](https://github.com/yu-ken0207/fastmcp-calculator-example/actions/workflows/test.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 > A small calculator MCP server built with FastMCP that shows how to expose an MCP server on a private network safely: API key or bearer token auth, Host / Origin / client IP allowlists (proxy-aware), and a JSONL audit log with a trace ID for every tool call. Includes client setup for Claude Desktop and Codex and an Nginx HTTPS reverse proxy example.
 
 這個專案提供一個可驗證、可記錄 audit log 的 Calculator MCP server。
@@ -350,7 +352,7 @@ pip install pytest
 python -m pytest -q
 ```
 
-`tests/test_server.py` 會實際開起 server，用 MCP 客戶端連上去檢查：沒帶或帶錯金鑰回 401、Host 與 Origin 不在白名單回 403、三個工具都在、呼叫後稽核紀錄有寫入同一個 trace id。`tests/test_config.py` 檢查設定檔讀取。
+`tests/test_server.py` 會實際開起 server，用 MCP 客戶端連上去檢查：沒帶或帶錯金鑰回 401、Host 與 Origin 不在白名單回 403、三個工具都在、呼叫後稽核紀錄有寫入同一個 trace id。`tests/test_config.py` 檢查設定檔讀取。每次 push 會在 GitHub Actions 自動跑。
 
 ## 成功標準
 
