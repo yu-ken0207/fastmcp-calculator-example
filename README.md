@@ -1,5 +1,7 @@
 # FastMCP Calculator Example
 
+> A small calculator MCP server built with FastMCP that shows how to expose an MCP server on a private network safely: API key or bearer token auth, Host / Origin / client IP allowlists (proxy-aware), and a JSONL audit log with a trace ID for every tool call. Includes client setup for Claude Desktop and Codex and an Nginx HTTPS reverse proxy example.
+
 這個專案提供一個可驗證、可記錄 audit log 的 Calculator MCP server。
 
 提供的 tools：
