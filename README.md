@@ -343,6 +343,15 @@ curl -H "X-API-Key: test-api-key" -H "Accept: text/event-stream" http://Tailscal
 - TLS 錯誤
   憑證或信任鏈尚未設定完成。
 
+## 測試
+
+```bash
+pip install pytest
+python -m pytest -q
+```
+
+`tests/test_server.py` 會實際開起 server，用 MCP 客戶端連上去檢查：沒帶或帶錯金鑰回 401、Host 與 Origin 不在白名單回 403、三個工具都在、呼叫後稽核紀錄有寫入同一個 trace id。`tests/test_config.py` 檢查設定檔讀取。
+
 ## 成功標準
 
 - server 啟動後建立 `logs/tool_calls.jsonl`
@@ -359,9 +368,6 @@ curl -H "X-API-Key: test-api-key" -H "Accept: text/event-stream" http://Tailscal
 
 - 還沒有使用者分級或金鑰管理機制
   目前是以 `MCP_API_KEYS` / `MCP_BEARER_TOKENS` 做基本驗證，尚未整合更完整的權限管理、金鑰輪替或 SSO。
-
-- 還沒有更完整的自動化測試
-  現在的測試主要覆蓋設定載入與基本 calculator tools，尚未涵蓋完整的 HTTP / MCP client 整合測試。
 
 ## License
 
