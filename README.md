@@ -360,3 +360,7 @@ curl -H "X-API-Key: test-api-key" -H "Accept: text/event-stream" http://Tailscal
 
 - 還沒有更完整的自動化測試
   現在的測試主要覆蓋設定載入與基本 calculator tools，尚未涵蓋完整的 HTTP / MCP client 整合測試。
+
+## License
+
+Apache-2.0，見 [LICENSE](LICENSE)。
