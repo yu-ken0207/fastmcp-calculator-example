@@ -4,15 +4,15 @@
 
 [![Tests](https://github.com/yu-ken0207/fastmcp-calculator-example/actions/workflows/test.yml/badge.svg)](https://github.com/yu-ken0207/fastmcp-calculator-example/actions/workflows/test.yml) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-這個專案提供一個可驗證、可記錄 audit log 的 Calculator MCP server。
+一個計算機 MCP server 範例（FastMCP），示範怎麼在內網安全地開放 MCP server：API key 或 bearer token 驗證、Host／Origin／來源 IP 白名單（支援反向代理），每次呼叫工具都留下一筆帶追蹤編號的 JSONL 稽核紀錄。也附上 Claude Desktop、Codex 的連線設定和 Nginx HTTPS 反向代理範例。
 
-提供的 tools：
+提供的工具：
 
 - `add(a, b)`
 - `subtract(a, b)`
 - `get_server_status()`
 
-正式入口只有一個：`server.py`
+程式入口只有一個：`server.py`
 
 ## 主要檔案
 
@@ -20,7 +20,7 @@
 - `mcp_server/config.py`：讀取 `config.production.env`
 - `mcp_server/security.py`：驗證 API key、Host、Client IP
 - `mcp_server/audit.py`：寫入 `logs/tool_calls.jsonl`
-- `mcp_server/tools.py`：Calculator tools
+- `mcp_server/tools.py`：計算機工具
 - `config.production.example.env`：設定檔範本
 - `nginx.conf`：Ubuntu / Nginx HTTPS 反向代理範例
 
@@ -97,7 +97,7 @@ python server.py
 http://127.0.0.1:8000/mcp
 ```
 
-瀏覽器直接打開若看到：
+用瀏覽器打開，如果看到：
 
 ```json
 {"error": "missing_or_invalid_token"}
@@ -151,7 +151,7 @@ http_headers = { "X-API-Key" = "test-api-key" }
 
 ### 1. 先做直連測試
 
-如果只是先讓另一台電腦測通，不先做 HTTPS / 反向代理，可直接開 `8000`。
+如果只是想先確認另一台電腦連得到，還不想設定 HTTPS 和反向代理，可以直接開放 `8000` 埠。
 
 把 `config.production.env` 改成：
 
@@ -168,13 +168,13 @@ MCP_TRUSTED_PROXY_CIDRS=127.0.0.1/32
 MCP_AUDIT_LOG=./logs/tool_calls.jsonl
 ```
 
-如果你只想放行某一台電腦，請把 `MCP_ALLOWED_CLIENT_CIDRS` 改成對方實際 IP位置 和 Tailscale的IP位置加上 `/32`，例如：
+如果只想放行某一台電腦，把 `MCP_ALLOWED_CLIENT_CIDRS` 改成那台電腦的實際 IP 和 Tailscale IP，後面加上 `/32`，例如：
 
 ```dotenv
 MCP_ALLOWED_CLIENT_CIDRS=100.101.102.103/32,192.168.1.50/32,127.0.0.1/32
 ```
 
-Windows 開防火牆：
+Windows 防火牆放行 8000 埠：
 
 ```powershell
 New-NetFirewallRule -DisplayName "Calculator MCP 8000" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8000
@@ -205,14 +205,14 @@ http://遠端主機Tailscale的IP位置:8000/mcp
 {"error": "missing_or_invalid_token"}
 ```
 
-代表網路、Host、Client IP 都已經通了。
+代表網路、Host 和來源 IP 的檢查都通過了。
 
 ### 2. 正式部署
 
 正式使用建議不要直接開 `8000`，而是：
 
 1. `MCP_HOST=127.0.0.1`
-2. 讓 app 只聽本機 `127.0.0.1:8000`
+2. 讓程式只監聽本機的 `127.0.0.1:8000`
 3. 前面放 HTTPS 反向代理
 4. 對外提供：
 
@@ -280,7 +280,7 @@ ss -ltnp | grep 8000
 
 代表 server 只綁本機，別台電腦一定連不到。
 
-### 用 curl 做最低限度測試
+### 用 curl 做最簡單的測試
 
 這個 server 使用 MCP streamable HTTP，所以 `curl` 也要帶：
 
@@ -314,7 +314,7 @@ curl -H "X-API-Key: test-api-key" -H "Accept: text/event-stream" http://Tailscal
   目前程式會自動讀取專案目錄裡的 `config.production.env`。如果你把設定檔放到別的路徑，才需要另外指定 `MCP_CONFIG_FILE`。
 
 - `MCP_HOST` 仍是 `127.0.0.1`
-  只會本機可連，別台電腦會 timeout。
+  只有本機連得到，別台電腦會逾時（timeout）。
 
 - `MCP_ALLOWED_HOSTS` 沒包含實際連線的 Host
   例如對方連 `http://100.101.102.104:8000/mcp`，那 `MCP_ALLOWED_HOSTS` 至少要包含 `100.101.102.104`。
@@ -326,12 +326,12 @@ curl -H "X-API-Key: test-api-key" -H "Accept: text/event-stream" http://Tailscal
   防火牆放行不等於可連線，還要確認 `MCP_HOST=0.0.0.0` 且 server 已重啟。
 
 - 瀏覽器或普通 `curl` 的錯誤被誤判成 server 壞掉
-  `missing_or_invalid_token` 常表示站台已通；`Not Acceptable: Client must accept text/event-stream` 常表示站台與 API key 都已通。
+  `missing_or_invalid_token` 通常表示 endpoint 已經連得到；`Not Acceptable: Client must accept text/event-stream` 通常表示 endpoint 和 API key 都沒問題。
 
 ### 常見回應
 
 - `missing_or_invalid_token`
-  endpoint 可達，但沒有有效 API key 或 Bearer token。
+  連得到 endpoint，但沒有帶有效的 API key 或 Bearer token。
 
 - `host_not_allowed`
   `MCP_ALLOWED_HOSTS` 沒包含實際連線的 Host。
@@ -352,7 +352,7 @@ pip install pytest
 python -m pytest -q
 ```
 
-`tests/test_server.py` 會實際開起 server，用 MCP 客戶端連上去檢查：沒帶或帶錯金鑰回 401、Host 與 Origin 不在白名單回 403、三個工具都在、呼叫後稽核紀錄有寫入同一個 trace id。`tests/test_config.py` 檢查設定檔讀取。每次 push 會在 GitHub Actions 自動跑。
+`tests/test_server.py` 會實際啟動 server，用 MCP 客戶端連上去檢查：沒帶或帶錯金鑰回 401、Host 與 Origin 不在白名單回 403、三個工具都在、呼叫後稽核紀錄有寫入同一個 trace id。`tests/test_config.py` 檢查設定檔讀取。每次 push 會在 GitHub Actions 自動跑。
 
 ## 成功標準
 
